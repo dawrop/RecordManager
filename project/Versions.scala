@@ -10,4 +10,7 @@ object Versions {
   lazy val configV = "1.4.3"
 
   lazy val scalaTestV = "3.2.19"
+
+  lazy val catsV = "2.12.0"
+
 }

@@ -2,7 +2,8 @@ import Dependencies.*
 
 resolvers += "Akka library repository".at("https://repo.akka.io/maven")
 
-lazy val dependencies = akka ++ slick ++ postgres ++ typesafeConfig ++ akkaTest ++ scalaTest
+lazy val dependencies = akka ++ slick ++ postgres ++ typesafeConfig ++ akkaTest ++ scalaTest ++ cats
+
 
 lazy val root = (project in file("."))
   .settings(
@@ -10,3 +11,11 @@ lazy val root = (project in file("."))
     name := "RecordManager",
     libraryDependencies ++= dependencies
   )
+
+//lazy val integrationTest = (project in file("integration"))
+//  .dependsOn(root % "provided -> provided;compile -> compile;test -> test; runtime -> runtime")
+//  .settings(
+//    publish / skip := true,
+//    libraryDependencies ++= testContainers
+//  )
+
