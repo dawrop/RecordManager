@@ -4,18 +4,15 @@ import com.typesafe.config.{ Config, ConfigFactory }
 
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-object PrioritiesConfigLoader {
+trait PrioritiesLoader {
   case class Priority(range: (BigDecimal, BigDecimal), priority: Int)
   case class PrioritiesList(priorities: List[Priority])
 
-  private def parseRange(range: String): (BigDecimal, BigDecimal) = {
-    val Array(start, end) = range.split("-").map(_.trim)
-    val startValue        = BigDecimal(start)
-    val endValue          = if (end == "*") BigDecimal(Long.MaxValue) else BigDecimal(end)
-    (startValue, endValue)
-  }
+  def loadPriorities(): PrioritiesList
+}
 
-  def loadPriorities(): PrioritiesList = {
+object PrioritiesConfigLoader extends PrioritiesLoader {
+  override def loadPriorities(): PrioritiesList = {
     val config: Config = ConfigFactory.load("application.conf")
 
     val priorities = config
@@ -29,5 +26,12 @@ object PrioritiesConfigLoader {
       .toList
 
     PrioritiesList(priorities)
+  }
+
+  private def parseRange(range: String): (BigDecimal, BigDecimal) = {
+    val Array(start, end) = range.split("-").map(_.trim)
+    val startValue        = BigDecimal(start)
+    val endValue          = if (end == "*") BigDecimal(Int.MaxValue) else BigDecimal(end)
+    (startValue, endValue)
   }
 }

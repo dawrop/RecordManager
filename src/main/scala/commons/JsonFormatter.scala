@@ -1,4 +1,4 @@
-package domain
+package commons
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import domain.model.{ Record, RecordsList }

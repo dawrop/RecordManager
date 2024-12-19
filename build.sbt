@@ -19,7 +19,9 @@ lazy val integrationTest = (project in file("integration"))
       scalaTest.map(_ % "test,it") ++
         akkaTest ++
         mockito ++
-        scalaMock
+        scalaMock ++
+        testContainers,
+    libraryDependencies += "com.h2database" % "h2" % "2.3.232" % Test
   )
 
 addCommandAlias("testIntegration", ";project integrationTest;test;project root")

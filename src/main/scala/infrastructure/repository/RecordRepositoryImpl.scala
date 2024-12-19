@@ -36,7 +36,7 @@ class RecordRepositoryImpl(db: Database)(implicit val executor: ExecutionContext
         (record, priority)
       }
 
-      val result = recordsWithPriority.sortBy(-_._2).headOption.map(_._1)
+      val result = recordsWithPriority.sortBy(_._2).headOption.map(_._1)
       result match {
         case Some(record) => processRecord(record, currentTime)
         case None         => Future.successful(None)
