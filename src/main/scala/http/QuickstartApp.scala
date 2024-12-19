@@ -4,7 +4,7 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 import domain.repository.RecordRepository
 import http.routes.RecordRoutes
 import infrastructure.repository.RecordRepositoryImpl
@@ -15,7 +15,7 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.io.StdIn
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object QuickstartApp {
   private def startHttpServer(routes: Route)(implicit system: ActorSystem[_]): Unit = {

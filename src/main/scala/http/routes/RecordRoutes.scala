@@ -4,12 +4,11 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{ Directives, Route }
 import cats.data.Validated
 import com.typesafe.scalalogging.LazyLogging
-import domain.JsonFormatter._
+import commons.JsonFormatter._
 import domain.model.Record
 import domain.repository.RecordRepository
 import spray.json.enrichAny
 
-import java.time.LocalDateTime
 import scala.util.{ Failure, Success }
 
 class RecordRoutes(recordRepo: RecordRepository) extends Directives with LazyLogging {
