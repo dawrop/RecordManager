@@ -2,8 +2,8 @@ package domain
 
 import cats.data.NonEmptyList
 import cats.implicits._
+import commons.validation.{ AmountError, NameDigitsError, NameError, PhoneNumError }
 import domain.model.Record
-import domain.validation.{ AmountError, NameDigitsError, NameError, PhoneNumError }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

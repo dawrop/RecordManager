@@ -1,4 +1,4 @@
-package domain.validation
+package commons.validation
 
 sealed trait RecordError {
   def message: String
