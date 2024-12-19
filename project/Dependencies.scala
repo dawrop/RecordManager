@@ -22,8 +22,16 @@ object Dependencies {
 
   lazy val akkaTest: Seq[ModuleID] = Seq(
     "com.typesafe.akka" %% "akka-http-testkit"        % akkaHttpV % Test,
-    "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaV     % Test,
+    "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaV     % Test
   )
 
+  lazy val cats: Seq[ModuleID] = Seq("org.typelevel" %% "cats-core" % catsV)
+
   lazy val scalaTest: Seq[ModuleID] = Seq("org.scalatest" %% "scalatest" % scalaTestV % "test")
+
+  lazy val testContainers: Seq[ModuleID] = Seq(
+    "com.dimafeng"      %% "testcontainers-scala-scalatest"  % "0.41.4" % Test,
+    "com.dimafeng"      %% "testcontainers-scala-postgresql" % "0.41.4" % Test,
+    "org.testcontainers" % "postgresql"                      % "1.20.4" % Test
+  )
 }

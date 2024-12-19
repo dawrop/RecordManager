@@ -1,8 +1,19 @@
+package http
+
 import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
+import domain.repository.RecordRepository
+import http.routes.RecordRoutes
+import infrastructure.repository.RecordRepositoryImpl
+import infrastructure.tables.RecordsTable.records
+import slick.jdbc.PostgresProfile.api._
 
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 object QuickstartApp {
@@ -22,6 +33,11 @@ object QuickstartApp {
   }
 
   def main(args: Array[String]): Unit = {
-    val config = ConfigFactory.load("application.conf")
+    val db = DbSetup.setup()
+    val recordRepository = new RecordRepositoryImpl(db)
+    val routes = new RecordRoutes(recordRepository).routes
+
+    implicit val system: ActorSystem[_] = ActorSystem(Behaviors.empty, "quickstart-system")
+    startHttpServer(routes)
   }
 }
