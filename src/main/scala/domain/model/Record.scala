@@ -2,9 +2,11 @@ package domain.model
 
 import cats.data._
 import cats.implicits._
-import domain.validation._
+import commons.validation.{ AmountError, NameDigitsError, NameError, PhoneNumError, RecordError }
 
-case class Record(name: String, phoneNum: String, amount: BigDecimal)
+import java.time.LocalDateTime
+
+case class Record(name: String, phoneNum: String, amount: BigDecimal, createdAt: LocalDateTime)
 
 object Record {
   private def validateName(value: String): ValidatedNel[RecordError, String] =
@@ -21,5 +23,10 @@ object Record {
     Validated.cond(value >= BigDecimal(0.0), value, AmountError).toValidatedNel
 
   def validate(record: Record): ValidatedNel[RecordError, Record] =
-    (validateName(record.name), validatePhoneNum(record.phoneNum), validateAmount(record.amount)).mapN(Record.apply)
+    (
+      validateName(record.name),
+      validatePhoneNum(record.phoneNum),
+      validateAmount(record.amount),
+      record.createdAt.validNel
+    ).mapN(Record.apply)
 }

@@ -14,6 +14,7 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.io.StdIn
 import scala.util.{Failure, Success}
 
 object QuickstartApp {
@@ -33,9 +34,9 @@ object QuickstartApp {
   }
 
   def main(args: Array[String]): Unit = {
-    val db = DbSetup.setup()
+    val db               = DbSetup.setup()
     val recordRepository = new RecordRepositoryImpl(db)
-    val routes = new RecordRoutes(recordRepository).routes
+    val routes           = new RecordRoutes(recordRepository).routes
 
     implicit val system: ActorSystem[_] = ActorSystem(Behaviors.empty, "quickstart-system")
     startHttpServer(routes)
