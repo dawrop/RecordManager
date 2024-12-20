@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.time.LocalDateTime
 
-class RecordsSpec extends AnyFlatSpec with Matchers {
+class RecordsValidationSpec extends AnyFlatSpec with Matchers {
 
   "validate" should "return valid for a correct Record" in {
     val record = Record("John", "+48123456789", 100.0, LocalDateTime.of(2024, 12, 19, 12, 30))

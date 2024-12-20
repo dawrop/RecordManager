@@ -1,6 +1,6 @@
 package it
 
-import domain.model.Record
+import domain.model.{ PersonReport, PhoneReport, Record, Report }
 import infrastructure.model.RecordsRow
 import infrastructure.repository.RecordRepositoryImpl
 import infrastructure.tables.RecordsTable
@@ -17,7 +17,7 @@ class RecordsRepoSpec extends AnyWordSpecLike with Matchers {
   import RecordsRepoSpecData._
 
   "Creating records" should {
-    val validRecord = Record("John", "+48123456789", BigDecimal(1000.0), LocalDateTime.of(2024, 12, 19, 12, 30))
+    val validRecord = Record("John", "+48123456789", BigDecimal(1000.0), LocalDateTime.of(2024, 12, 19, 11, 30))
     val result      = Await.result(recordRepo.create(validRecord), 2.seconds)
 
     "successfully create a record and return its ID" in {
@@ -26,7 +26,7 @@ class RecordsRepoSpec extends AnyWordSpecLike with Matchers {
   }
 
   "Fetching records for processing" when {
-    val tableQuery = RecordsTable.records
+    // Add 2 more records
     Await.result(db.run(tableQuery ++= testRecords), 2.seconds)
 
     "a record has the highest priority" should {
@@ -34,7 +34,7 @@ class RecordsRepoSpec extends AnyWordSpecLike with Matchers {
 
       "fetch the record with the highest priority" in {
         result shouldEqual Some(
-          Record("John", "+48123456789", BigDecimal(1000.0), LocalDateTime.of(2024, 12, 19, 12, 30))
+          Record("John", "+48123456789", BigDecimal(1000.0), LocalDateTime.of(2024, 12, 19, 11, 30))
         )
       }
 
@@ -48,7 +48,7 @@ class RecordsRepoSpec extends AnyWordSpecLike with Matchers {
             "+48123456789",
             BigDecimal(1000.0),
             processedAt,
-            LocalDateTime.of(2024, 12, 19, 12, 30)
+            LocalDateTime.of(2024, 12, 19, 11, 30)
           )
         )
       }
@@ -72,6 +72,24 @@ class RecordsRepoSpec extends AnyWordSpecLike with Matchers {
       }
     }
   }
+
+  "Generating report" when {
+    "report is generated only for processed records" should {
+      val result = Await.result(recordRepo.getReport(true), 2.seconds)
+
+      "return report only with processed records" in {
+        result shouldEqual Some(processedReport)
+      }
+    }
+
+    "report is generated for all records" should {
+      val result = Await.result(recordRepo.getReport(false), 2.seconds)
+      println(result)
+      "return report with all records" in {
+        result shouldEqual Some(allReport)
+      }
+    }
+  }
 }
 
 object RecordsRepoSpecData {
@@ -81,8 +99,24 @@ object RecordsRepoSpecData {
   val schemaSetup = RecordsTable.records.schema.createIfNotExists
   Await.result(db.run(schemaSetup), 2.seconds)
 
+  val tableQuery = RecordsTable.records
+
   val testRecords: Seq[RecordsRow] = Seq(
-    RecordsRow.fromDomain(Record("John", "+48123456789", BigDecimal(700.0), LocalDateTime.of(2024, 12, 19, 12, 30))),
+    RecordsRow.fromDomain(Record("John", "+48123456789", BigDecimal(700.0), LocalDateTime.of(2024, 12, 19, 13, 30))),
     RecordsRow.fromDomain(Record("Alice", "+48987654321", BigDecimal(600.0), LocalDateTime.of(2024, 12, 19, 12, 30)))
+  )
+
+  val processedReport = Report(
+    Seq(
+      PhoneReport("+48987654321", Seq(PersonReport("Alice", 600.00, LocalDateTime.of(2024, 12, 19, 12, 30)))),
+      PhoneReport("+48123456789", Seq(PersonReport("John", 1000.00, LocalDateTime.of(2024, 12, 19, 11, 30))))
+    )
+  )
+
+  val allReport = Report(
+    Seq(
+      PhoneReport("+48987654321", Vector(PersonReport("Alice", 600.00, LocalDateTime.of(2024, 12, 19, 12, 30)))),
+      PhoneReport("+48123456789", Vector(PersonReport("John", 1700.00, LocalDateTime.of(2024, 12, 19, 13, 30))))
+    )
   )
 }

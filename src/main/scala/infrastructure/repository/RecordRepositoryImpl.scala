@@ -2,7 +2,7 @@ package infrastructure.repository
 
 import commons.PrioritiesConfigLoader
 import commons.PrioritiesConfigLoader.PrioritiesList
-import domain.model.Record
+import domain.model.{ PersonReport, PhoneReport, Record, Report }
 import domain.repository.RecordRepository
 import infrastructure.model.RecordsRow
 import infrastructure.tables.RecordsTable
@@ -23,7 +23,7 @@ class RecordRepositoryImpl(db: Database)(implicit val executor: ExecutionContext
   override def getRecordToProcess: Future[Option[Record]] = {
     val currentTime    = LocalDateTime.now()
     val threeDaysAgo   = currentTime.minusDays(3)
-    val priolitiesList = PrioritiesConfigLoader.loadPriorities()
+    val prioritiesList = PrioritiesConfigLoader.loadPriorities()
 
     val query = tableQuery
       .filter(_.processedAt.isEmpty)
@@ -32,7 +32,7 @@ class RecordRepositoryImpl(db: Database)(implicit val executor: ExecutionContext
 
     results.flatMap { records =>
       val recordsWithPriority = records.map { record =>
-        val priority = getPriority(record.amount, priolitiesList)
+        val priority = getPriority(record.amount, prioritiesList)
         (record, priority)
       }
 
@@ -57,4 +57,46 @@ class RecordRepositoryImpl(db: Database)(implicit val executor: ExecutionContext
       amount >= priority.range._1 && amount <= priority.range._2
     }.map(_.priority).getOrElse(Int.MaxValue) // TODO think about this default value
 
+  override def getReport(processedOnly: Boolean): Future[Option[Report]] = {
+    val query       = getQuery(processedOnly)
+    val reportQuery = getReportQuery(query)
+
+    db.run(reportQuery.result).map { rows =>
+      if (rows.isEmpty) None
+      else Some(transform(rows))
+    }
+  }
+
+  private def getQuery(processedOnly: Boolean): Query[RecordsTable, RecordsTable#TableElementType, Seq] =
+    if (processedOnly) tableQuery.filter(_.processedAt.isDefined)
+    else tableQuery
+
+  private def getReportQuery(query: Query[RecordsTable, RecordsTable#TableElementType, Seq]): Query[
+    (Rep[String], Rep[String], Rep[BigDecimal], Rep[LocalDateTime]),
+    (String, String, BigDecimal, LocalDateTime),
+    Seq
+  ] =
+    query
+      .groupBy(r => (r.phoneNumber, r.name))
+      .map { case ((phone, name), records) =>
+        (
+          phone,
+          name,
+          records.map(_.amount).sum.getOrElse(BigDecimal(0)),
+          records.map(_.createdAt).max.getOrElse(LocalDateTime.now)
+        )
+      }
+
+  private def transform(rows: Seq[(String, String, BigDecimal, LocalDateTime)]): Report = {
+    val phoneReports = rows
+      .groupBy(_._1)
+      .map { case (phone, groupedRows) =>
+        val personReports = groupedRows.map { case (_, name, total, latest) =>
+          PersonReport(name, total, latest)
+        }
+        PhoneReport(phone, personReports)
+      }
+      .toSeq
+    Report(phoneReports)
+  }
 }

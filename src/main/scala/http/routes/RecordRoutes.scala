@@ -15,38 +15,57 @@ class RecordRoutes(recordRepo: RecordRepository) extends Directives with LazyLog
 
   val routes: Route = pathPrefix("records") {
     pathEnd {
-      concat(
-        post {
-          entity(as[Record]) { record =>
-            Record.validate(record) match {
-              case Validated.Valid(validRec) =>
-                onComplete(recordRepo.create(validRec)) {
-                  case Success(id) =>
-                    complete(StatusCodes.Created, s"Record created with ID: $id")
-                  case Failure(ex) =>
-                    logger.error(s"Error during record creation: ${ex.getMessage}")
-                    complete(StatusCodes.InternalServerError, s"Error during record creation: ${ex.getMessage}")
-                }
-              case Validated.Invalid(e) =>
-                val errorMess = e.map(err => err.message).toList.mkString(", ")
-                logger.error(s"400 Bad Request: Validation failed: $errorMess")
-                complete(StatusCodes.BadRequest, s"Validation failed: $errorMess")
-            }
+      post {
+        entity(as[Record]) { record =>
+          Record.validate(record) match {
+            case Validated.Valid(validRec) =>
+              onComplete(recordRepo.create(validRec)) {
+                case Success(id) =>
+                  complete(StatusCodes.Created, s"Record created with ID: $id")
+                case Failure(ex) =>
+                  logger.error(s"Error during record creation: ${ex.getMessage}")
+                  complete(StatusCodes.InternalServerError, "An unexpected error occurred. Please try again later")
+              }
+            case Validated.Invalid(e) =>
+              val errorMess = e.map(err => err.message).toList.mkString(", ")
+              logger.error(s"400 Bad Request: Validation failed: $errorMess")
+              complete(StatusCodes.BadRequest, s"Validation failed: $errorMess")
           }
-        },
+        }
+      } ~
         get {
           onComplete(recordRepo.getRecordToProcess) {
             case Success(optRecord) =>
               optRecord match {
                 case Some(value) => complete(StatusCodes.OK, value.toJson)
-                case None        => complete(StatusCodes.NoContent)
+                case None        => complete(StatusCodes.NotFound, "No records available for processing")
               }
             case Failure(ex) =>
               logger.error(s"Fetching error: ${ex.getMessage}")
-              complete(StatusCodes.InternalServerError, s"Fetching error: ${ex.getMessage}")
+              complete(StatusCodes.InternalServerError, "An unexpected error occurred. Please try again later")
           }
         }
-      )
     }
-  }
+  } ~
+    path("report") {
+      parameter("processedOnly".as[Boolean]) { flag =>
+        get {
+          onComplete(recordRepo.getReport(flag)) {
+            case Success(optReport) =>
+              optReport match {
+                case Some(value) => complete(StatusCodes.OK, value.toJson)
+                case None =>
+                  complete(
+                    StatusCodes.NotFound,
+                    "Report not generated: no data available or all records were filtered out"
+                  )
+              }
+            case Failure(ex) =>
+              logger.error(s"Report error: ${ex.getMessage}")
+              complete(StatusCodes.InternalServerError, "An unexpected error occurred. Please try again later")
+          }
+        }
+
+      }
+    }
 }
