@@ -1,23 +1,20 @@
 package http
 
-import slick.jdbc.PostgresProfile.api._
 import com.typesafe.config.{ Config, ConfigFactory }
 import infrastructure.tables.RecordsTable.records
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
 object DbSetup {
   private def dbConnection(config: Config) = {
-    val host     = config.getString("db.host")
-    val port     = config.getString("db.port")
-    val database = config.getString("db.database")
-    val user     = config.getString("db.user")
-    val pass     = config.getString("db.password")
+    val jdbcUrl = config.getString("db.postgres.url")
+    val user    = config.getString("db.postgres.user")
+    val pass    = config.getString("db.postgres.password")
+    val driver  = config.getString("db.postgres.driver")
 
-    val jdbcUrl = s"jdbc:postgresql://$host:$port/$database"
-
-    Database.forURL(jdbcUrl, user = user, password = pass)
+    Database.forURL(jdbcUrl, user = user, password = pass, driver = driver)
   }
 
   def setup() = {

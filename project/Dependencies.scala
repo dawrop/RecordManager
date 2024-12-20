@@ -1,10 +1,7 @@
 import Versions.*
 import sbt.*
 
-import scala.collection.immutable.Seq
-
 object Dependencies {
-
   lazy val akka: Seq[ModuleID] = Seq(
     "com.typesafe.akka" %% "akka-http"            % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
@@ -20,6 +17,8 @@ object Dependencies {
 
   lazy val postgres: Seq[ModuleID] = Seq("org.postgresql" % "postgresql" % postgresqlV)
 
+  lazy val h2: Seq[ModuleID] = Seq("com.h2database" % "h2" % h2V % Test)
+
   lazy val typesafeConfig: Seq[ModuleID] = Seq("com.typesafe" % "config" % configV)
 
   lazy val cats: Seq[ModuleID] = Seq("org.typelevel" %% "cats-core" % catsV)
@@ -31,16 +30,18 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaV     % Test
   )
 
-  lazy val mockito: Seq[ModuleID] = Seq("org.mockito" % "mockito-core" % "5.14.2" % Test)
+  lazy val mockito: Seq[ModuleID] = Seq("org.mockito" % "mockito-core" % mockitoV % Test)
 
-  lazy val scalaMock: Seq[ModuleID] = Seq("org.scalamock" %% "scalamock" % "6.0.0" % Test)
+  lazy val scalaMock: Seq[ModuleID] = Seq("org.scalamock" %% "scalamock" % scalaMockV % Test)
 
   lazy val testContainers: Seq[ModuleID] = Seq(
-    "com.dimafeng"      %% "testcontainers-scala-scalatest"  % "0.41.4" % Test,
-    "com.dimafeng"      %% "testcontainers-scala-postgresql" % "0.41.4" % Test,
-    "org.testcontainers" % "postgresql"                      % "1.20.4" % Test
+    "com.dimafeng"      %% "testcontainers-scala-scalatest"  % testContV         % Test,
+    "com.dimafeng"      %% "testcontainers-scala-postgresql" % testContV         % Test,
+    "org.testcontainers" % "postgresql"                      % testContPostgresV % Test
   )
 
-  lazy val logging: Seq[ModuleID] =
-    Seq("com.typesafe.scala-logging" %% "scala-logging" % "3.9.5", "ch.qos.logback" % "logback-classic" % "1.5.12")
+  lazy val logging: Seq[ModuleID] = Seq(
+    "com.typesafe.scala-logging" %% "scala-logging"   % scalaLoggingV,
+    "ch.qos.logback"              % "logback-classic" % logbackV
+  )
 }
