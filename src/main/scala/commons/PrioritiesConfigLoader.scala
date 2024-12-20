@@ -4,14 +4,14 @@ import com.typesafe.config.{ Config, ConfigFactory }
 
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-trait PrioritiesLoader {
+trait PrioritiesConfigLoader {
   case class Priority(range: (BigDecimal, BigDecimal), priority: Int)
   case class PrioritiesList(priorities: List[Priority])
 
   def loadPriorities(): PrioritiesList
 }
 
-object PrioritiesConfigLoader extends PrioritiesLoader {
+object PrioritiesConfigLoader extends PrioritiesConfigLoader {
   override def loadPriorities(): PrioritiesList = {
     val config: Config = ConfigFactory.load("application.conf")
 

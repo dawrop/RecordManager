@@ -6,7 +6,6 @@ import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import commons.JsonFormatter._
-import commons.PrioritiesLoader
 import domain.model.{ PersonReport, PhoneReport, Record, Report }
 import domain.repository.RecordRepository
 import http.routes.RecordRoutes
@@ -166,7 +165,6 @@ object RecordsRoutesData {
   def createActorSystem(): ActorSystem                 = typedSystem.classicSystem
 
   val recordRepoMock: RecordRepository = mock(classOf[RecordRepository])
-  val prioLoaderMock: PrioritiesLoader = mock(classOf[PrioritiesLoader])
   val recordRoutesMock: Route          = new RecordRoutes(recordRepoMock).routes
 
   val recordEntity: Record = Record("John", "+48123456789", BigDecimal(1000.0), LocalDateTime.of(2024, 12, 19, 12, 30))
