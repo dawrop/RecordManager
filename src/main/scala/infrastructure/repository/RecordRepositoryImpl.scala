@@ -20,7 +20,7 @@ class RecordRepositoryImpl(db: Database)(implicit val executor: ExecutionContext
     db.run(insertQuery)
   }
 
-  override def getRecordToProcess(): Future[Option[Record]] = {
+  override def getRecordToProcess: Future[Option[Record]] = {
     val currentTime    = LocalDateTime.now()
     val threeDaysAgo   = currentTime.minusDays(3)
     val priolitiesList = PrioritiesConfigLoader.loadPriorities()

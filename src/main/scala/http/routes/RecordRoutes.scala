@@ -35,7 +35,7 @@ class RecordRoutes(recordRepo: RecordRepository) extends Directives with LazyLog
           }
         },
         get {
-          onComplete(recordRepo.getRecordToProcess()) {
+          onComplete(recordRepo.getRecordToProcess) {
             case Success(optRecord) =>
               optRecord match {
                 case Some(value) => complete(StatusCodes.OK, value.toJson)
